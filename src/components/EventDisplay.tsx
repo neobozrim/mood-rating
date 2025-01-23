@@ -13,20 +13,13 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   const [newRatingIndex, setNewRatingIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    useEffect(() => {
-  const handleMessage = (e: MessageEvent) => {
-    if (e.data.type === 'newRating' && e.data.eventId === event.id) {
-      setRatings(e.data.ratings);
-    }
-  };
-  window.addEventListener('message', handleMessage);
-  return () => window.removeEventListener('message', handleMessage);
-}, [event.id]);
+    // Load initial ratings
     const storedRatings = localStorage.getItem(`ratings_${event.id}`);
     if (storedRatings) {
       setRatings(JSON.parse(storedRatings));
     }
 
+    // Handle storage updates
     const handleStorage = (e: StorageEvent) => {
       if (e.key === `ratings_${event.id}` && e.newValue) {
         const updatedRatings = JSON.parse(e.newValue);
@@ -36,8 +29,20 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
       }
     };
 
+    // Handle messages
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data.type === 'newRating' && e.data.eventId === event.id) {
+        setRatings(e.data.ratings);
+      }
+    };
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('message', handleMessage);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('message', handleMessage);
+    };
   }, [event.id]);
 
   const currentUrl = window.location.href.split('?')[0];
