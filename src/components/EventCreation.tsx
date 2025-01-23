@@ -11,16 +11,26 @@ export const EventCreation: React.FC<Props> = ({ onCreateEvent }) => {
   const [eventName, setEventName] = useState('');
 
 const createEvent = async () => {
-  if (!eventName) return;
+  if (!eventName.trim()) return;
 
-  const { data } = await supabase
-    .from('events')
-    .insert([{ name: eventName }])
-    .select()
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .insert([{ name: eventName }])
+      .select()
+      .single(); // Use .single() to get first result directly
 
-  if (data) {
-    onCreateEvent(eventName);
-    setEventName('');
+    if (error) {
+      console.error('Error creating event:', error);
+      return;
+    }
+
+    if (data) {
+      onCreateEvent(data.name);
+      setEventName('');
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err);
   }
 };
 
