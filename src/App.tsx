@@ -1,4 +1,3 @@
-// App.tsx
 import { useState, useEffect } from 'react';
 import { EventCreation } from './components/EventCreation';
 import { EventDisplay } from './components/EventDisplay';
@@ -20,7 +19,14 @@ const App = () => {
          .select()
          .eq('id', eventId)
          .single();
-       if (data) setCurrentEvent(data);
+       
+       if (data) {
+         const currentMode = new URLSearchParams(window.location.search).get('mode');
+         if (!currentMode) {
+           window.history.replaceState({}, '', `?event=${data.id}`);
+         }
+         setCurrentEvent(data);
+       }
      }
    };
 
@@ -40,7 +46,15 @@ const App = () => {
      {!currentEvent ? (
        <EventCreation onCreateEvent={createEvent} />
      ) : (
-       <EventDisplay event={currentEvent} />
+       <>
+         <EventDisplay event={currentEvent} />
+         <button 
+           onClick={() => setCurrentEvent(null)}
+           className="mt-4 p-2 bg-gray-200 rounded"
+         >
+           Create New Event
+         </button>
+       </>
      )}
    </div>
  );
