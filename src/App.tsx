@@ -34,6 +34,7 @@ const App = () => {
    const updatedEvents = [...events, newEvent];
    setEvents(updatedEvents);
    localStorage.setItem('events', JSON.stringify(updatedEvents));
+   window.history.pushState({}, '', `?event=${newEvent.id}`);  // Add this line
    setCurrentEvent(newEvent);
  };
 
