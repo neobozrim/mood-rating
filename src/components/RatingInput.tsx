@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// RatingInput.tsx
+import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { colors } from '../constants/colors';
 import { supabase } from '../lib/supabaseClient';
@@ -12,7 +13,7 @@ export const RatingInput: React.FC<Props> = ({ eventId }) => {
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('ratings')
       .insert([{
         event_id: eventId,

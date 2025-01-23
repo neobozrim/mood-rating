@@ -1,3 +1,4 @@
+// EventDisplay.tsx
 import { useEffect, useState } from 'react';
 import { Event, Rating } from '../types/types';
 import { QRCodeGenerator } from './QRCodeGenerator';
@@ -33,8 +34,8 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
       .channel('ratings')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'ratings', filter: `event_id=eq.${event.id}` },
-        (payload) => {
-          setRatings(current => [...current, payload.new]);
+        (payload: { new: Rating }) => {
+          setRatings(current => [...current, payload.new as Rating]);
           setNewRatingIndex(ratings.length);
           setTimeout(() => setNewRatingIndex(null), 1000);
         }

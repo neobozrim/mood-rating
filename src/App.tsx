@@ -35,6 +35,17 @@ const App = () => {
     fetchCurrentEvent();
   }, [eventId]);
 
+    const createEvent = async (name: string) => {
+    const { data } = await supabase
+      .from('events')
+      .insert([{ name }])
+      .select();
+    if (data) {
+      window.history.pushState({}, '', `?event=${data[0].id}`);
+      setCurrentEvent(data[0]);
+    }
+  };
+
   if (mode === 'rate' && eventId) {
     return <RatingInput eventId={eventId} />;
   }
