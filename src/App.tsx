@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState, useEffect } from 'react';
 import { EventCreation } from './components/EventCreation';
 import { EventDisplay } from './components/EventDisplay';
