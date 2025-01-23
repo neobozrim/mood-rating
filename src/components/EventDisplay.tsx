@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Event, Rating } from '../types/types';
 import { QRCodeGenerator } from './QRCodeGenerator';
 import { RatingDot } from './RatingDot';
 import { colors } from '../constants/colors';
+import { supabase } from '../lib/supabaseClient';
 
 interface Props {
   event: Event;
@@ -13,52 +14,46 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   const [newRatingIndex, setNewRatingIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const loadRatings = () => {
-      const storedRatings = localStorage.getItem(`ratings_${event.id}`);
-      console.log('Loading ratings for event:', event.id);
-      if (storedRatings) {
-        const parsedRatings = JSON.parse(storedRatings);
-        console.log('Found ratings:', parsedRatings);
-        setRatings(parsedRatings);
-        setNewRatingIndex(parsedRatings.length - 1);
+    const fetchRatings = async () => {
+      const { data } = await supabase
+        .from('ratings')
+        .select()
+        .eq('event_id', event.id);
+      
+      if (data) {
+        setRatings(data);
+        setNewRatingIndex(data.length - 1);
         setTimeout(() => setNewRatingIndex(null), 1000);
       }
     };
 
-    loadRatings();
-    
-    // Poll for updates every 5 seconds
-    const pollInterval = setInterval(loadRatings, 5000);
+    fetchRatings();
 
-    const handleMessage = (e: MessageEvent) => {
-      if (e.data.type === 'newRating' && e.data.eventId === event.id) {
-        setRatings(e.data.ratings);
-        setNewRatingIndex(e.data.ratings.length - 1);
-        setTimeout(() => setNewRatingIndex(null), 1000);
-      }
-    };
+    const subscription = supabase
+      .channel('ratings')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'ratings', filter: `event_id=eq.${event.id}` },
+        (payload) => {
+          setRatings(current => [...current, payload.new]);
+          setNewRatingIndex(ratings.length);
+          setTimeout(() => setNewRatingIndex(null), 1000);
+        }
+      )
+      .subscribe();
 
-    window.addEventListener('storage', loadRatings);
-    window.addEventListener('message', handleMessage);
-    
     return () => {
-      clearInterval(pollInterval);
-      window.removeEventListener('storage', loadRatings);
-      window.removeEventListener('message', handleMessage);
+      subscription.unsubscribe();
     };
   }, [event.id]);
-
-  const currentUrl = window.location.href.split('?')[0];
-  const ratingUrl = `${currentUrl}?event=${event.id}&mode=rate`;
 
   return (
     <div className="p-8 rounded-lg shadow-lg" style={{ backgroundColor: colors.alpine_oat }}>
       <h2 className="text-2xl font-bold mb-4">{event.name}</h2>
       <div className="mb-8">
-        <QRCodeGenerator value={ratingUrl} />
+        <QRCodeGenerator value={`${import.meta.env.VITE_APP_URL}/rate/${event.id}`} />
         <div className="mt-2 text-sm text-center break-all">
           <p>Scan QR code or visit:</p>
-          <p className="font-mono">{ratingUrl}</p>
+          <p className="font-mono">{`${import.meta.env.VITE_APP_URL}/rate/${event.id}`}</p>
         </div>
       </div>
       <div className="flex gap-4 items-center min-h-24 flex-wrap">
