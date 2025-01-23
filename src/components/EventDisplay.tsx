@@ -13,38 +13,30 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   const [newRatingIndex, setNewRatingIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Load initial ratings
-    const storedRatings = localStorage.getItem(`ratings_${event.id}`);
-    console.log('Stored ratings:', storedRatings);
-    if (storedRatings) {
-      const parsedRatings = JSON.parse(storedRatings);
-      console.log('Parsed ratings:', parsedRatings);
-      console.log('Type of event.id:', typeof event.id, 'Value:', event.id);
-      setRatings(parsedRatings);
-    }
-
-    // Handle storage updates
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === `ratings_${event.id}` && e.newValue) {
-        const updatedRatings = JSON.parse(e.newValue);
-        setRatings(updatedRatings);
-        setNewRatingIndex(updatedRatings.length - 1);
+    const loadRatings = () => {
+      const storedRatings = localStorage.getItem(`ratings_${event.id}`);
+      console.log('Loading ratings:', storedRatings);
+      if (storedRatings) {
+        const parsedRatings = JSON.parse(storedRatings);
+        setRatings(parsedRatings);
+        setNewRatingIndex(parsedRatings.length - 1);
         setTimeout(() => setNewRatingIndex(null), 1000);
       }
     };
 
-    // Handle messages
+    loadRatings();
+
     const handleMessage = (e: MessageEvent) => {
       if (e.data.type === 'newRating' && e.data.eventId === event.id) {
         setRatings(e.data.ratings);
       }
     };
 
-    window.addEventListener('storage', handleStorage);
+    window.addEventListener('storage', loadRatings);
     window.addEventListener('message', handleMessage);
     
     return () => {
-      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('storage', loadRatings);
       window.removeEventListener('message', handleMessage);
     };
   }, [event.id]);
