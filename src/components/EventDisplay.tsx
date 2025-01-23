@@ -15,9 +15,10 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   useEffect(() => {
     const loadRatings = () => {
       const storedRatings = localStorage.getItem(`ratings_${event.id}`);
-      console.log('Loading ratings:', storedRatings);
+      console.log('Loading ratings for event:', event.id);
       if (storedRatings) {
         const parsedRatings = JSON.parse(storedRatings);
+        console.log('Found ratings:', parsedRatings);
         setRatings(parsedRatings);
         setNewRatingIndex(parsedRatings.length - 1);
         setTimeout(() => setNewRatingIndex(null), 1000);
@@ -25,10 +26,15 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
     };
 
     loadRatings();
+    
+    // Poll for updates every 5 seconds
+    const pollInterval = setInterval(loadRatings, 5000);
 
     const handleMessage = (e: MessageEvent) => {
       if (e.data.type === 'newRating' && e.data.eventId === event.id) {
         setRatings(e.data.ratings);
+        setNewRatingIndex(e.data.ratings.length - 1);
+        setTimeout(() => setNewRatingIndex(null), 1000);
       }
     };
 
@@ -36,6 +42,7 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
     window.addEventListener('message', handleMessage);
     
     return () => {
+      clearInterval(pollInterval);
       window.removeEventListener('storage', loadRatings);
       window.removeEventListener('message', handleMessage);
     };
