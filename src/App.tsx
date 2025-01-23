@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// App.tsx
+import { useState, useEffect } from 'react';
 import { EventCreation } from './components/EventCreation';
 import { EventDisplay } from './components/EventDisplay';
 import { RatingInput } from './components/RatingInput';
@@ -6,20 +7,12 @@ import { Event } from './types/types';
 import { supabase } from './lib/supabaseClient';
 
 const App = () => {
-  const [events, setEvents] = useState<Event[]>([]);
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get('event');
   const mode = urlParams.get('mode');
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const { data } = await supabase
-        .from('events')
-        .select();
-      if (data) setEvents(data);
-    };
-
     const fetchCurrentEvent = async () => {
       if (eventId) {
         const { data } = await supabase
@@ -31,11 +24,10 @@ const App = () => {
       }
     };
 
-    fetchEvents();
     fetchCurrentEvent();
   }, [eventId]);
 
-    const createEvent = async (name: string) => {
+  const createEvent = async (name: string) => {
     const { data } = await supabase
       .from('events')
       .insert([{ name }])
