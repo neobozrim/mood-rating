@@ -10,19 +10,19 @@ interface Props {
 export const EventCreation: React.FC<Props> = ({ onCreateEvent }) => {
   const [eventName, setEventName] = useState('');
 
-  const createEvent = async () => {
-    if (!eventName) return;
+const createEvent = async () => {
+  if (!eventName) return;
 
-    const { data, error } = await supabase
-      .from('events')
-      .insert([{ name: eventName }])
-      .select()
+  const { data } = await supabase
+    .from('events')
+    .insert([{ name: eventName }])
+    .select()
 
-    if (data) {
-      onCreateEvent(eventName);
-      setEventName('');
-    }
-  };
+  if (data) {
+    onCreateEvent(eventName);
+    setEventName('');
+  }
+};
 
   return (
     <div className="p-8 bg-white rounded-lg shadow-lg" style={{ backgroundColor: colors.alpine_oat }}>
