@@ -7,50 +7,43 @@ import { Event } from './types/types';
 import { supabase } from './lib/supabaseClient';
 
 const App = () => {
-  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventId = urlParams.get('event');
-  const mode = urlParams.get('mode');
+ const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+ const urlParams = new URLSearchParams(window.location.search);
+ const eventId = urlParams.get('event');
+ const mode = urlParams.get('mode');
 
-  useEffect(() => {
-    const fetchCurrentEvent = async () => {
-      if (eventId) {
-        const { data } = await supabase
-          .from('events')
-          .select()
-          .eq('id', eventId)
-          .single();
-        if (data) setCurrentEvent(data);
-      }
-    };
+ useEffect(() => {
+   const fetchCurrentEvent = async () => {
+     if (eventId) {
+       const { data } = await supabase
+         .from('events')
+         .select()
+         .eq('id', eventId)
+         .single();
+       if (data) setCurrentEvent(data);
+     }
+   };
 
-    fetchCurrentEvent();
-  }, [eventId]);
+   fetchCurrentEvent();
+ }, [eventId]);
 
-  const createEvent = async (name: string) => {
-    const { data } = await supabase
-      .from('events')
-      .insert([{ name }])
-      .select();
-    if (data) {
-      window.history.pushState({}, '', `?event=${data[0].id}`);
-      setCurrentEvent(data[0]);
-    }
-  };
+ const createEvent = (event: Event) => {
+   setCurrentEvent(event);
+ };
 
-  if (mode === 'rate' && eventId) {
-    return <RatingInput eventId={eventId} />;
-  }
+ if (mode === 'rate' && eventId) {
+   return <RatingInput eventId={eventId} />;
+ }
 
-  return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
-      {!currentEvent ? (
-        <EventCreation onCreateEvent={createEvent} />
-      ) : (
-        <EventDisplay event={currentEvent} />
-      )}
-    </div>
-  );
+ return (
+   <div className="max-w-2xl mx-auto py-8 px-4">
+     {!currentEvent ? (
+       <EventCreation onCreateEvent={createEvent} />
+     ) : (
+       <EventDisplay event={currentEvent} />
+     )}
+   </div>
+ );
 };
 
 export default App;
