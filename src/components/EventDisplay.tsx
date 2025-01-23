@@ -13,6 +13,15 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   const [newRatingIndex, setNewRatingIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    useEffect(() => {
+  const handleMessage = (e: MessageEvent) => {
+    if (e.data.type === 'newRating' && e.data.eventId === event.id) {
+      setRatings(e.data.ratings);
+    }
+  };
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, [event.id]);
     const storedRatings = localStorage.getItem(`ratings_${event.id}`);
     if (storedRatings) {
       setRatings(JSON.parse(storedRatings));

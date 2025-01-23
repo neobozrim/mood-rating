@@ -52,6 +52,7 @@ const App = () => {
 
   if (mode === 'rate' && eventId) {
     return <RatingInput onSubmitRating={submitRating} />;
+    window.opener?.postMessage({ type: 'newRating', eventId, ratings: updatedRatings }, '*');
   }
 
   return (
