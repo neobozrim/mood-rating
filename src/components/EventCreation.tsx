@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { colors } from '../constants/colors';
+import { supabase } from '../lib/supabaseClient';
 
 interface Props {
   onCreateEvent: (name: string) => void;
@@ -8,6 +9,20 @@ interface Props {
 
 export const EventCreation: React.FC<Props> = ({ onCreateEvent }) => {
   const [eventName, setEventName] = useState('');
+
+  const createEvent = async () => {
+    if (!eventName) return;
+
+    const { data, error } = await supabase
+      .from('events')
+      .insert([{ name: eventName }])
+      .select()
+
+    if (data) {
+      onCreateEvent(eventName);
+      setEventName('');
+    }
+  };
 
   return (
     <div className="p-8 bg-white rounded-lg shadow-lg" style={{ backgroundColor: colors.alpine_oat }}>
@@ -21,12 +36,7 @@ export const EventCreation: React.FC<Props> = ({ onCreateEvent }) => {
           className="flex-1 p-2 rounded border"
         />
         <button
-          onClick={() => {
-            if (eventName) {
-              onCreateEvent(eventName);
-              setEventName('');
-            }
-          }}
+          onClick={createEvent}
           className="p-2 rounded-full"
           style={{ backgroundColor: colors.aura_indigo }}
         >
