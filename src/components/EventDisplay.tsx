@@ -15,8 +15,11 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
   useEffect(() => {
     // Load initial ratings
     const storedRatings = localStorage.getItem(`ratings_${event.id}`);
+    console.log('Stored ratings:', storedRatings);
     if (storedRatings) {
-      setRatings(JSON.parse(storedRatings));
+      const parsedRatings = JSON.parse(storedRatings);
+      console.log('Parsed ratings:', parsedRatings);
+      setRatings(parsedRatings);
     }
 
     // Handle storage updates
