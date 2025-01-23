@@ -19,6 +19,7 @@ export const EventDisplay: React.FC<Props> = ({ event }) => {
     if (storedRatings) {
       const parsedRatings = JSON.parse(storedRatings);
       console.log('Parsed ratings:', parsedRatings);
+      console.log('Type of event.id:', typeof event.id, 'Value:', event.id);
       setRatings(parsedRatings);
     }
 

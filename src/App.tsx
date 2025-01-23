@@ -37,14 +37,32 @@ const App = () => {
    setCurrentEvent(newEvent);
  };
 
- const submitRating = (value: number) => {
+/** const submitRating = (value: number) => {
    const rating = { value, timestamp: Date.now() };
    const storedRatings = localStorage.getItem(`ratings_${eventId}`);
    const ratings = storedRatings ? JSON.parse(storedRatings) : [];
    const updatedRatings = [...ratings, rating];
    localStorage.setItem(`ratings_${eventId}`, JSON.stringify(updatedRatings));
    window.opener?.postMessage({ type: 'newRating', eventId, ratings: updatedRatings }, '*');
- };
+ }; **/
+
+ const submitRating = (value: number) => {
+  if (!eventId) return;
+  
+  const rating = { value, timestamp: Date.now() };
+  const storedRatings = localStorage.getItem(`ratings_${eventId}`);
+  console.log('Submitting rating for event:', eventId);
+  console.log('Current stored ratings:', storedRatings);
+  console.log('Type of eventId:', typeof eventId, 'Value:', eventId);
+  
+  const ratings = storedRatings ? JSON.parse(storedRatings) : [];
+  const updatedRatings = [...ratings, rating];
+  
+  localStorage.setItem(`ratings_${eventId}`, JSON.stringify(updatedRatings));
+  console.log('Updated ratings:', updatedRatings);
+  
+  window.opener?.postMessage({ type: 'newRating', eventId, ratings: updatedRatings }, '*');
+};
 
  if (mode === 'rate' && eventId) {
    return <RatingInput onSubmitRating={submitRating} />;
